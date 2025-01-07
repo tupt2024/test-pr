@@ -1,0 +1,40 @@
+name: Notify Google Chat
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    types: [opened, closed, merged]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification to Google Chat
+        env:
+          GOOGLE_CHAT_WEBHOOK: https://chat.googleapis.com/v1/spaces/AAAABZa6LiI/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=aomqm1HUEYH1Ru00ixE8zWgLwcvMqFejM_FtxmzC6gc
+        run: |
+          EVENT_TYPE="${{ github.event_name }}"
+          REPO="${{ github.repository }}"
+          ACTOR="${{ github.actor }}"
+          BRANCH="${GITHUB_REF##*/}"
+          ACTION="${{ github.event.action }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          
+          if [ "$EVENT_TYPE" == "push" ]; then
+            MESSAGE="🚀 *Push Event:* $ACTOR has pushed code to branch *$BRANCH* in repository *$REPO*."
+          elif [ "$EVENT_TYPE" == "pull_request" ] && [ "$ACTION" == "opened" ]; then
+            MESSAGE="📥 *Pull Request Opened:* $ACTOR has opened a PR titled *$PR_TITLE*.\n🔗 Link: $PR_URL"
+          elif [ "$EVENT_TYPE" == "pull_request" ] && [ "$ACTION" == "closed" ]; then
+            MESSAGE="✅ *Pull Request Closed:* $ACTOR has closed the PR titled *$PR_TITLE*.\n🔗 Link: $PR_URL"
+          elif [ "$EVENT_TYPE" == "pull_request" ] && [ "$ACTION" == "merged" ]; then
+            MESSAGE="🎉 *Pull Request Merged:* $ACTOR has merged the PR titled *$PR_TITLE*.\n🔗 Link: $PR_URL"
+          else
+            MESSAGE="⚠️ *Unknown Event:* $EVENT_TYPE"
+          fi
+
+          curl -X POST -H 'Content-Type: application/json' \
+            -d "{\"text\": \"$MESSAGE\"}" \
+            "$GOOGLE_CHAT_WEBHOOK"
