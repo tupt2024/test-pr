@@ -11,17 +11,18 @@ on:
       - work
       - test
 
-name: API Gateway Service Build and Push to ECR
-
-# https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
-env:
-  AWS_DEFAULT_REGION: ap-southeast-2
-  AWS_DEFAULT_OUTPUT: json
-  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  CONTAINER_IMAGE: shipeezi-gateway:${{ github.sha }}  
-  APP_NAME: shipeezi-gateway-demo
-  KUBE_NAMESPACE: Deployment
-  KUBECTL_VERSION: "v1.23.6"
-  IAM_VERSION: "0.5.5" 
+jobs:
+  notify1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification to Google Chat
+        env:
+          GOOGLE_CHAT_WEBHOOK: https://chat.googleapis.com/v1/spaces/AAAABZa6LiI/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=aomqm1HUEYH1Ru00ixE8zWgLwcvMqFejM_FtxmzC6gc
+        run: |
+          EVENT_TYPE="${{ github.event_name }}"
+          REPO="${{ github.repository }}"
+          ACTOR="${{ github.actor }}"
+          BRANCH="${GITHUB_REF##*/}"
+          ACTION="${{ github.event.action }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_URL="${{ github.event.pull_request.html_url }}"
