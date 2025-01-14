@@ -1,4 +1,4 @@
-name: Notify Google Chat
+name: Notify Google Chat1111
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
     types: [opened, closed, merged]
 
 jobs:
-  notify:
+  notify111:
     runs-on: ubuntu-latest
     steps:
       - name: Send notification to Google Chat
